@@ -21,7 +21,7 @@ function App() {
   const [selectedNote, setSelectedNote] = useState<Note>(initialNote);
   const [favoriteList, setFavoriteList] = useState([])
   const [data, setData] = useState([]);
-  const [currentTheme, setCurrentTheme] = useState(themes.light);
+  const [currentTheme, setCurrentTheme] = useState(themes.dark);
 
 
   useEffect(() => {
@@ -50,19 +50,22 @@ function App() {
     );
   };
 
-  const onDelete = (noteID:Note["id"]) => {
-
-    console.log("bouta delete");
-
+  const onDelete = (noteID: Note["id"]) => {
     const newNotesList = notes.filter((item: any) => item.id !== noteID);
     setNotes(newNotesList);
   }
 
+  const toggleTheme = () => {
+    setCurrentTheme(currentTheme === themes.light ? themes.dark : themes.light);
+  }
 
   return (
     <div className='app-container'>
-      <ThemeContext.Provider value={{ currentTheme, setCurrentTheme }}>
-      <form className="note-form" onSubmit={createNoteHandler}>
+
+      <form 
+        className="note-form" 
+        onSubmit={createNoteHandler}
+      >
         <div>
           <input
             placeholder="Note Title"
@@ -84,43 +87,55 @@ function App() {
           </textarea>
         </div>
 
-      <div>
-        <select
-          onChange={(event) =>
-            setCreateNote({ ...createNote, label: event.target.value as Label })}
-          required>
-          <option value={Label.personal}>Personal</option>
-          <option value={Label.study}>Study</option>
-          <option value={Label.work}>Work</option>
-          <option value={Label.other}>Other</option>
-        </select>
-      </div>
+        <div>
+          <select
+            onChange={(event) =>
+              setCreateNote({ ...createNote, label: event.target.value as Label })}
+            required>
+            <option value={Label.personal}>Personal</option>
+            <option value={Label.study}>Study</option>
+            <option value={Label.work}>Work</option>
+            <option value={Label.other}>Other</option>
+          </select>
+        </div>
 
         <div><button type="submit">Create Note</button></div>
       </form>
 
-    <div className="notes-grid">
-      {notes.map((note) => (
-        <div
-          key={note.id}
-          className="note-item">
-          <div className="notes-header">
-            <LikeButton title={note.title} favList={favoriteList} setFavList={setFavoriteList}/>
-            <button onClick={() => onDelete(note.id)}>x</button>
+      <div className="notes-grid">
+        {notes.map((note) => (
+          <div
+            key={note.id}
+            className="note-item"
+            style={{ background: currentTheme.foreground, color: currentTheme.background }}            >
+            <div className="notes-header">
+              <LikeButton title={note.title} favList={favoriteList} setFavList={setFavoriteList}/>
+              <button onClick={() => onDelete(note.id)}>x</button>
+            </div>
+            <h2 contentEditable="true" onInput={(e) => onNoteChange(e, note.id)}> {note.title} </h2>
+            <p contentEditable="true"> {note.content} </p>
+            <p contentEditable="true"> {note.label} </p>
           </div>
-          <h2 contentEditable="true" onInput={(e) => onNoteChange(e, note.id)}> {note.title} </h2>
-          <p contentEditable="true"> {note.content} </p>
-          <p contentEditable="true"> {note.label} </p>
+        ))}
+        <h2>List of favorites:</h2>
+        <div>
+          {data.map(txt => <p>{txt}</p>)}
         </div>
-      ))}
-      <h2>List of favorites:</h2>
-      <div>
-        {data.map(txt => <p>{txt}</p>)}
       </div>
+
+      <button 
+        onClick={toggleTheme}
+        style={{
+          width: "200px", 
+          height: "100px" 
+        }}
+      >
+        Toggle Theme
+      </button>
+
     </div>
-    </ThemeContext.Provider>
-    </div>
-  );}
+  );
+}
 
 export default App;
 
